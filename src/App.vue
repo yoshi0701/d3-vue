@@ -10,6 +10,8 @@
         >
       </div>
     </form>
+    <div class="alert alert-info" v-show="loading">Loading...</div>
+    <div class="alert alert-danger" v-show="errored">An error occured</div>
     <chart :issues="issues"></chart>
   </div>
 </template>
@@ -20,10 +22,15 @@
 
   import Chart from '@/components/Chart.vue';
 
+  import "bootstrap/dist/css/bootstrap.css";
+  import "bootstrap-vue/dist/bootstrap-vue.css";
+
   export default {
     name: "app",
     data() {
       return {
+        loading: false,
+        errored: false,
         issues: [],
         repository: "",
         startDate: null
@@ -47,6 +54,8 @@
         return dates;
       },
       getIssues() {
+        this.loading = true;
+        this.errored = false;
         this.startDate = moment()
           .subtract(6, "days")
           .format("YYYY-MM-DD");
@@ -66,8 +75,12 @@
             });
 
             this.issues = payload;
-            console.log(this.issues);
-          });
+          })
+          .catch(error => {
+            this.errored = true;
+            console.error(error);
+          })
+          .finally(() => (this.loading = false));
       }
     }
   };
@@ -81,5 +94,8 @@
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.bar {
+  fill: #319bbe;
 }
 </style>
